@@ -76,7 +76,7 @@ p {
 
   <p>Progress: <span id="jText">0</span> / 890 km</p>
   <div class="bar">
-    <div id="jBar" class="fill" style="background: #ac79c7;"></div>
+    <div id="jBar" class="fill" style="background: #9B59B6;"></div>
   </div>
 </div>
 
@@ -87,7 +87,7 @@ p {
 
   <p>Progress: <span id="rText">0</span> / 890 km</p>
   <div class="bar">
-    <div id="rBar" class="fill" style="background: #65c269;"></div>
+    <div id="rBar" class="fill" style="background: #2ECC71;"></div>
   </div>
 </div>
 
@@ -169,10 +169,10 @@ function updateLeader(jKm, rKm) {
 
   if (jKm > rKm) {
     el.innerText = `Justyna ahead by ${gap} km`;
-    el.style.color = "#ac79c7";
+    el.style.color = "#9B59B6";
   } else {
     el.innerText = `Raymond ahead by ${gap} km`;
-    el.style.color = "#65c269";
+    el.style.color = "#2ECC71";
   }
 }
 
