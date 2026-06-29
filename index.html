@@ -1,13 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bruce Trail Map</title>
+  <title>J & R Take On The Bruce Trail</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet map library -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    #map { height: 90vh; }
+  </style>
 </head>
+
 <body>
 
-<h1>My Bruce Trail Map</h1>
+<h2>Bruce Trail Progress</h2>
 
-<p>This is my starting point.</p>
+<div id="map"></div>
+
+<script>
+  // Create map centered on Niagara (start of Bruce Trail)
+  var map = L.map('map').setView([43.1, -79.1], 8);
+
+  // Add real-world map tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+  }).addTo(map);
+
+  // Add a test marker (your starting point)
+  var marker = L.marker([43.1, -79.1]).addTo(map)
+    .bindPopup("Start: Niagara")
+    .openPopup();
+</script>
 
 </body>
 </html>
