@@ -144,7 +144,7 @@ var justyna = L.marker([43.1, -79.1], {
 var raymond = L.marker([43.1, -79.1], {
   icon: L.divIcon({
     className: "",
-    html: '<div style="font-size:18px; filter: drop-shadow(0 0 4px #65c269);">🟢</div>'
+    html: '<div style="font-size:18px; filter: drop-shadow(0 0 4px #6da15d);">🟢</div>'
   })
 }).addTo(map);
 
@@ -169,10 +169,10 @@ function updateLeader(jKm, rKm) {
 
   if (jKm > rKm) {
     el.innerText = `Justyna ahead by ${gap} km`;
-    el.style.color = "purple";
+    el.style.color = "ac79c7";
   } else {
     el.innerText = `Raymond ahead by ${gap} km`;
-    el.style.color = "green";
+    el.style.color = "#6da15d";
   }
 }
 
