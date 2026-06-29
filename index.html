@@ -4,15 +4,13 @@
   <title>bruce-trail-map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
 
   <style>
     #map { height: 90vh; }
   </style>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
 </head>
 
 <body>
@@ -36,36 +34,49 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-// real trail storage
 let realTrail = [];
+let cumDist = []; // cumulative distance in meters
 
-// 🟣 Justyna marker
+function haversine(a, b) {
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180;
+
+  const dLat = toRad(b[0] - a[0]);
+  const dLng = toRad(b[1] - a[1]);
+
+  const lat1 = toRad(a[0]);
+  const lat2 = toRad(b[0]);
+
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+// markers
 var justynaIcon = L.divIcon({
   className: "custom-icon",
-  html: '<div style="background: lavender; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
+  html: '<div style="background: purple; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
 });
 
-var justyna = L.marker([43.1, -79.1], { icon: justynaIcon }).addTo(map);
-
-// 🟢 Raymond marker
 var raymondIcon = L.divIcon({
   className: "custom-icon",
   html: '<div style="background: green; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
 });
 
+var justyna = L.marker([43.1, -79.1], { icon: justynaIcon }).addTo(map);
 var raymond = L.marker([43.1, -79.1], { icon: raymondIcon }).addTo(map);
 
-// LOAD GPX FILE
+// LOAD GPX
 fetch("Bruce_Trail.gpx")
   .then(res => res.text())
   .then(gpxText => {
 
     const parser = new DOMParser();
     const gpx = parser.parseFromString(gpxText, "text/xml");
-
     const geoJson = toGeoJSON.gpx(gpx);
 
-    // 🔥 FIX: combine ALL trkseg / features, not just the first one
     realTrail = [];
 
     geoJson.features.forEach(feature => {
@@ -75,29 +86,43 @@ fetch("Bruce_Trail.gpx")
       }
     });
 
-    // draw full trail
+    // build cumulative distance
+    cumDist = [0];
+
+    for (let i = 1; i < realTrail.length; i++) {
+      const d = haversine(realTrail[i - 1], realTrail[i]);
+      cumDist.push(cumDist[i - 1] + d);
+    }
+
+    // draw trail
     L.polyline(realTrail, {
       color: "brown",
       weight: 4,
       opacity: 0.8
     }).addTo(map);
 
-    // start markers
     if (realTrail.length > 0) {
       justyna.setLatLng(realTrail[0]);
       raymond.setLatLng(realTrail[0]);
     }
   });
 
+// convert km -> index using distance search
+function getIndexFromKm(km) {
+  const target = km * 1000;
+
+  for (let i = 0; i < cumDist.length; i++) {
+    if (cumDist[i] >= target) return i;
+  }
+  return cumDist.length - 1;
+}
+
 // MOVE JUSTYNA
 function moveJustyna() {
   if (!realTrail.length) return;
 
   let km = Number(document.getElementById("justynaKm").value);
-  let index = Math.floor(km * 10);
-
-  if (index < 0) index = 0;
-  if (index >= realTrail.length) index = realTrail.length - 1;
+  let index = getIndexFromKm(km);
 
   justyna.setLatLng(realTrail[index]);
 }
@@ -107,10 +132,7 @@ function moveRaymond() {
   if (!realTrail.length) return;
 
   let km = Number(document.getElementById("raymondKm").value);
-  let index = Math.floor(km * 10);
-
-  if (index < 0) index = 0;
-  if (index >= realTrail.length) index = realTrail.length - 1;
+  let index = getIndexFromKm(km);
 
   raymond.setLatLng(realTrail[index]);
 }
