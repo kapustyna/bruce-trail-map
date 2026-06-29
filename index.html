@@ -20,30 +20,25 @@
 <div id="map"></div>
 
 <script>
-  // Create map centered on Niagara (start of Bruce Trail)
   var map = L.map('map').setView([43.1, -79.1], 8);
 
-  // Add real-world map tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
   }).addTo(map);
 
-  // Add a test marker (your starting point)
-  var marker = L.marker([43.1, -79.1]).addTo(map)
+  var trail = [
+    [43.1, -79.1],
+    [43.5, -79.8],
+    [44.0, -80.2],
+    [44.6, -80.8],
+    [45.0, -81.0]
+  ];
+
+  L.polyline(trail, { color: 'brown' }).addTo(map);
+
+  var marker = L.marker(trail[0]).addTo(map)
     .bindPopup("Start: Niagara")
     .openPopup();
-
-  var trail = [
-  [43.1, -79.1],  // Niagara (start)
-  [43.5, -79.8],
-  [44.0, -80.2],
-  [44.6, -80.8],
-  [45.0, -81.0]
-];
-
-var polyline = L.polyline(trail, {
-  color: 'green'
-}).addTo(map);
 </script>
 
 </body>
