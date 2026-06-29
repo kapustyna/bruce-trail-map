@@ -17,13 +17,13 @@
 
 <h2>Justyna & Raymond Take on The Bruce Trail</h2>
 
-<h3>Justyna</h3>
-<input id="youKm" type="number" placeholder="Your km">
-<button onclick="moveYou()">Move You</button>
+<h3>Justyna 🟣</h3>
+<input id="justynaKm" type="number" placeholder="Enter km">
+<button onclick="moveJustyna()">Move</button>
 
-<h3>Raymond</h3>
-<input id="rayKm" type="number" placeholder="Ray's km">
-<button onclick="moveRay()">Move Ray</button>
+<h3>Raymond 🟢</h3>
+<input id="raymondKm" type="number" placeholder="Enter km">
+<button onclick="moveRaymond()">Move</button>
   
 <div id="map"></div>
 
@@ -44,28 +44,21 @@ var trail = [
 
 L.polyline(trail, { color: 'brown' }).addTo(map);
 
-// YOU
-var youMarker = L.marker(trail[0], {
-  icon: L.divIcon({ className: "you-icon" })
-}).addTo(map);
+var justynaMarker = L.marker(trail[0]).addTo(map);
+var raymondMarker = L.marker(trail[0]).addTo(map);
 
-// RAYMOND
-var rayMarker = L.marker(trail[0], {
-  icon: L.divIcon({ className: "bf-icon" })
-}).addTo(map);
-
-function moveYou() {
-  let km = Number(document.getElementById("youKm").value);
+function moveJustyna() {
+  let km = Number(document.getElementById("justynaKm").value);
   let index = Math.floor(km / 10);
   if (index >= trail.length) index = trail.length - 1;
-  youMarker.setLatLng(trail[index]);
+  justynaMarker.setLatLng(trail[index]);
 }
 
-function moveBF() {
-  let km = Number(document.getElementById("bfKm").value);
+function moveRaymond() {
+  let km = Number(document.getElementById("raymondKm").value);
   let index = Math.floor(km / 10);
   if (index >= trail.length) index = trail.length - 1;
-  bfMarker.setLatLng(trail[index]);
+  raymondMarker.setLatLng(trail[index]);
 }
 </script>
 
