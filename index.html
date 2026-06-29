@@ -17,8 +17,13 @@
 
 <h2>Justyna & Raymond Take on The Bruce Trail</h2>
 
-<input id="km" type="number" placeholder="Enter km">
-<button onclick="move()">Move</button>
+<h3>Justyna</h3>
+<input id="youKm" type="number" placeholder="Your km">
+<button onclick="moveYou()">Move You</button>
+
+<h3>Raymond</h3>
+<input id="rayKm" type="number" placeholder="Ray's km">
+<button onclick="moveRay()">Move Ray</button>
   
 <div id="map"></div>
 
@@ -39,22 +44,28 @@ var trail = [
 
 L.polyline(trail, { color: 'brown' }).addTo(map);
 
-var marker = L.marker(trail[0]).addTo(map);
+// YOU
+var youMarker = L.marker(trail[0], {
+  icon: L.divIcon({ className: "you-icon" })
+}).addTo(map);
 
-// SIMPLE GLOBAL FUNCTION (no window, no confusion)
-function move() {
-  let km = document.getElementById("km").value;
+// RAYMOND
+var rayMarker = L.marker(trail[0], {
+  icon: L.divIcon({ className: "bf-icon" })
+}).addTo(map);
 
-  km = Number(km);
-
+function moveYou() {
+  let km = Number(document.getElementById("youKm").value);
   let index = Math.floor(km / 10);
-
-  if (isNaN(index)) return;
-
-  if (index < 0) index = 0;
   if (index >= trail.length) index = trail.length - 1;
+  youMarker.setLatLng(trail[index]);
+}
 
-  marker.setLatLng(trail[index]);
+function moveBF() {
+  let km = Number(document.getElementById("bfKm").value);
+  let index = Math.floor(km / 10);
+  if (index >= trail.length) index = trail.length - 1;
+  bfMarker.setLatLng(trail[index]);
 }
 </script>
 
