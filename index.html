@@ -58,7 +58,7 @@
 <h2>QUEST #1: BRUCE TRAIL 🥾🌳</h2>
 
 <!-- 🟣 JUSTYNA -->
-<h3>🟣 Justyna</h3>
+<h3>🟣Justyna</h3>
 <input id="justynaKm" type="number" step="0.001" placeholder="Enter km">
 <button onclick="moveJustyna()">Move</button>
 
@@ -68,7 +68,7 @@
 </div>
 
 <!-- 🟢 RAYMOND -->
-<h3>🟢 Raymond</h3>
+<h3>🟢Raymond</h3>
 <input id="raymondKm" type="number" step="0.001" placeholder="Enter km">
 <button onclick="moveRaymond()">Move</button>
 
@@ -141,10 +141,10 @@ function updateLeader(jKm, rKm) {
   const el = document.getElementById("leaderText");
 
   if (jKm > rKm) {
-    el.innerText = `🟣 Justyna is ahead by ${gap} km`;
+    el.innerText = `Justyna is ahead by ${gap} km`;
     el.style.color = "purple";
   } else {
-    el.innerText = `🟢 Raymond is ahead by ${gap} km`;
+    el.innerText = `Raymond is ahead by ${gap} km`;
     el.style.color = "green";
   }
 }
