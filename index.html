@@ -65,15 +65,28 @@ fetch("Bruce_Trail.gpx")
 
     const geoJson = toGeoJSON.gpx(gpx);
 
-    realTrail = geoJson.features[0].geometry.coordinates
-      .map(c => [c[1], c[0]]);
+    // 🔥 FIX: combine ALL trkseg / features, not just the first one
+    realTrail = [];
 
-    // draw real trail
-    L.polyline(realTrail, { color: "brown" }).addTo(map);
+    geoJson.features.forEach(feature => {
+      if (feature.geometry && feature.geometry.type === "LineString") {
+        const coords = feature.geometry.coordinates.map(c => [c[1], c[0]]);
+        realTrail = realTrail.concat(coords);
+      }
+    });
+
+    // draw full trail
+    L.polyline(realTrail, {
+      color: "brown",
+      weight: 4,
+      opacity: 0.8
+    }).addTo(map);
 
     // start markers
-    justyna.setLatLng(realTrail[0]);
-    raymond.setLatLng(realTrail[0]);
+    if (realTrail.length > 0) {
+      justyna.setLatLng(realTrail[0]);
+      raymond.setLatLng(realTrail[0]);
+    }
   });
 
 // MOVE JUSTYNA
@@ -81,7 +94,6 @@ function moveJustyna() {
   if (!realTrail.length) return;
 
   let km = Number(document.getElementById("justynaKm").value);
-
   let index = Math.floor(km * 10);
 
   if (index < 0) index = 0;
@@ -95,7 +107,6 @@ function moveRaymond() {
   if (!realTrail.length) return;
 
   let km = Number(document.getElementById("raymondKm").value);
-
   let index = Math.floor(km * 10);
 
   if (index < 0) index = 0;
