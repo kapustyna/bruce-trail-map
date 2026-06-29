@@ -10,6 +10,21 @@
 
   <style>
     #map { height: 90vh; }
+
+    .bar {
+      width: 100%;
+      background: #ddd;
+      height: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 12px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 
@@ -21,9 +36,22 @@
 <input id="justynaKm" type="number" placeholder="Enter km">
 <button onclick="moveJustyna()">Move</button>
 
+<p>🟣 Justyna: <span id="jText">0</span> / 890 km</p>
+<div class="bar">
+  <div id="jBar" class="fill" style="background: purple;"></div>
+</div>
+
 <h3>Raymond 🟢</h3>
 <input id="raymondKm" type="number" placeholder="Enter km">
 <button onclick="moveRaymond()">Move</button>
+
+<p>🟢 Raymond: <span id="rText">0</span> / 890 km</p>
+<div class="bar">
+  <div id="rBar" class="fill" style="background: green;"></div>
+</div>
+
+<h3>Race Status</h3>
+<p id="leaderText">Waiting for movement...</p>
 
 <div id="map"></div>
 
@@ -35,7 +63,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 let realTrail = [];
-let cumDist = []; // cumulative distance in meters
+let cumDist = [];
 
 function haversine(a, b) {
   const R = 6371000;
@@ -68,6 +96,29 @@ var raymondIcon = L.divIcon({
 var justyna = L.marker([43.1, -79.1], { icon: justynaIcon }).addTo(map);
 var raymond = L.marker([43.1, -79.1], { icon: raymondIcon }).addTo(map);
 
+// UPDATE PROGRESS BAR
+function updateUI(prefix, km) {
+  const total = 890;
+  const percent = Math.min((km / total) * 100, 100);
+
+  document.getElementById(prefix + "Text").innerText = km.toFixed(3);
+  document.getElementById(prefix + "Bar").style.width = percent + "%";
+}
+
+// 🟣🟢 LEADER SYSTEM (NEW)
+function updateLeader(jKm, rKm) {
+  const gap = Math.abs(jKm - rKm).toFixed(3);
+  const el = document.getElementById("leaderText");
+
+  if (jKm > rKm) {
+    el.innerText = `Justyna is ahead by ${gap} km`;
+    el.style.color = "purple";
+  } else {
+    el.innerText = `Raymond is ahead by ${gap} km`;
+    el.style.color = "green";
+  }
+}
+
 // LOAD GPX
 fetch("Bruce_Trail.gpx")
   .then(res => res.text())
@@ -86,7 +137,6 @@ fetch("Bruce_Trail.gpx")
       }
     });
 
-    // build cumulative distance
     cumDist = [0];
 
     for (let i = 1; i < realTrail.length; i++) {
@@ -94,20 +144,17 @@ fetch("Bruce_Trail.gpx")
       cumDist.push(cumDist[i - 1] + d);
     }
 
-    // draw trail
     L.polyline(realTrail, {
       color: "brown",
       weight: 4,
       opacity: 0.8
     }).addTo(map);
 
-    if (realTrail.length > 0) {
-      justyna.setLatLng(realTrail[0]);
-      raymond.setLatLng(realTrail[0]);
-    }
+    justyna.setLatLng(realTrail[0]);
+    raymond.setLatLng(realTrail[0]);
   });
 
-// convert km -> index using distance search
+// km -> index
 function getIndexFromKm(km) {
   const target = km * 1000;
 
@@ -125,6 +172,9 @@ function moveJustyna() {
   let index = getIndexFromKm(km);
 
   justyna.setLatLng(realTrail[index]);
+
+  updateUI("j", km);
+  updateLeader(km, Number(document.getElementById("raymondKm").value) || 0);
 }
 
 // MOVE RAYMOND
@@ -135,6 +185,9 @@ function moveRaymond() {
   let index = getIndexFromKm(km);
 
   raymond.setLatLng(realTrail[index]);
+
+  updateUI("r", km);
+  updateLeader(Number(document.getElementById("justynaKm").value) || 0, km);
 }
 </script>
 
