@@ -70,7 +70,7 @@ p {
 <h2>QUEST #1: BRUCE TRAIL 🥾🌳</h2>
 
 <div class="player">
-  <h3>🟣JUSTYNA</h3>
+  <h3>🟣 JUSTYNA</h3>
   <input id="justynaKm" type="number" step="0.001">
   <button onclick="moveJustyna()">Move</button>
 
@@ -81,7 +81,7 @@ p {
 </div>
 
 <div class="player">
-  <h3>🟢RAYMOND</h3>
+  <h3>🟢 RAYMOND</h3>
   <input id="raymondKm" type="number" step="0.001">
   <button onclick="moveRaymond()">Move</button>
 
@@ -91,20 +91,21 @@ p {
   </div>
 </div>
 
-<!-- 👻 GHOST (UPDATED) -->
+<!-- 👻 GHOST -->
 <div class="player">
-  <h3>👻OPTIMAL GHOST</h3>
+  <h3>👻 OPTIMAL GHOST</h3>
+
   <p>
     Day <span id="optDay">1</span> |
     <span id="optText">0 km</span>
   </p>
 
   <div class="bar">
-    <div id="optBar" class="fill" style="background: black;"></div>
+    <div id="optBar" class="fill" style="background: #444;"></div>
   </div>
 </div>
 
-<h3>🏁RACE STATUS</h3>
+<h3>🏁 RACE STATUS</h3>
 <p id="leaderText">Waiting for movement...</p>
 
 <button onclick="saveProgress()">💾 Save</button>
@@ -140,15 +141,21 @@ function haversine(a, b) {
 
 /* ---------------- MARKERS ---------------- */
 var justyna = L.marker([43.1, -79.1], {
-  icon: L.divIcon({ html: '<div style="background: purple;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>' })
+  icon: L.divIcon({
+    html: '<div style="background:purple;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>'
+  })
 }).addTo(map);
 
 var raymond = L.marker([43.1, -79.1], {
-  icon: L.divIcon({ html: '<div style="background: green;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>' })
+  icon: L.divIcon({
+    html: '<div style="background:green;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>'
+  })
 }).addTo(map);
 
 var ghost = L.marker([43.1, -79.1], {
-  icon: L.divIcon({ html: '<div style="background:white;width:12px;height:12px;border-radius:50%;border:2px solid black;"></div>' })
+  icon: L.divIcon({
+    html: '<div style="background:#444;width:12px;height:12px;border-radius:50%;border:2px solid black;"></div>'
+  })
 }).addTo(map);
 
 /* ---------------- UI ---------------- */
@@ -183,7 +190,7 @@ function getIndexFromKm(km) {
   return cumDist.length - 1;
 }
 
-/* ---------------- 👻 GHOST SYSTEM (SAFE) ---------------- */
+/* ---------------- GHOST (SAFE, NO SAVE INTERFERENCE) ---------------- */
 const startDate = new Date("2026-06-27");
 const kmPerDay = 6.58;
 
@@ -199,15 +206,12 @@ function updateGhost() {
 
   const km = day * kmPerDay;
 
-  // text
   document.getElementById("optDay").innerText = day;
   document.getElementById("optText").innerText = km.toFixed(3) + " km";
 
-  // bar
   const percent = Math.min((km / 890) * 100, 100);
   document.getElementById("optBar").style.width = percent + "%";
 
-  // marker
   ghost.setLatLng(realTrail[getIndexFromKm(km)]);
 }
 
@@ -231,6 +235,7 @@ fetch("Bruce_Trail.gpx")
     });
 
     cumDist = [0];
+
     for (let i = 1; i < realTrail.length; i++) {
       cumDist.push(
         cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
@@ -273,7 +278,7 @@ function moveRaymond() {
   updateGhost();
 }
 
-/* ---------------- SAVE (UNCHANGED SAFE) ---------------- */
+/* ---------------- SAVE (SAFE + ISOLATED) ---------------- */
 function saveProgress() {
   localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
   localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
