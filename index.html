@@ -13,7 +13,17 @@ body {
   font-family: Consolas, "Courier New", monospace;
   font-weight: bold;
 }
-    #map { height: 90vh; }
+
+    #map {
+  height: 65vh;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  #map {
+    height: 55vh;
+  }
+}
 
     .bar {
       width: 100%;
