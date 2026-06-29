@@ -91,18 +91,14 @@ p {
   </div>
 </div>
 
-<!-- 👻 GHOST -->
-<div class="player">
-  <h3>👻 OPTIMAL GHOST</h3>
+<h3>👻 OPTIMAL GHOST</h3>
+<p>
+  Day <span id="optDay">1</span> |
+  <span id="optText">0 km</span>
+</p>
 
-  <p>
-    Day <span id="optDay">1</span> |
-    <span id="optText">0 km</span>
-  </p>
-
-  <div class="bar">
-    <div id="optBar" class="fill" style="background: #black;"></div>
-  </div>
+<div class="bar">
+  <div id="optBar" class="fill" style="background: #444;"></div>
 </div>
 
 <h3>🏁 RACE STATUS</h3>
@@ -122,7 +118,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let realTrail = [];
 let cumDist = [];
 
-/* ---------------- DISTANCE ---------------- */
 function haversine(a, b) {
   const R = 6371000;
   const toRad = x => x * Math.PI / 180;
@@ -139,26 +134,18 @@ function haversine(a, b) {
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-/* ---------------- MARKERS ---------------- */
 var justyna = L.marker([43.1, -79.1], {
-  icon: L.divIcon({
-    html: '<div style="background:purple;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>'
-  })
+  icon: L.divIcon({ html: '<div style="background:purple;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>' })
 }).addTo(map);
 
 var raymond = L.marker([43.1, -79.1], {
-  icon: L.divIcon({
-    html: '<div style="background:green;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>'
-  })
+  icon: L.divIcon({ html: '<div style="background:green;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>' })
 }).addTo(map);
 
 var ghost = L.marker([43.1, -79.1], {
-  icon: L.divIcon({
-    html: '<div style="background:#white;width:12px;height:12px;border-radius:50%;border:2px solid black;"></div>'
-  })
+  icon: L.divIcon({ html: '<div style="background:#444;width:12px;height:12px;border-radius:50%;border:2px solid black;"></div>' })
 }).addTo(map);
 
-/* ---------------- UI ---------------- */
 function updateUI(prefix, km) {
   const total = 890;
   const percent = Math.min((km / total) * 100, 100);
@@ -172,52 +159,45 @@ function updateLeader(jKm, rKm) {
   const el = document.getElementById("leaderText");
 
   if (jKm > rKm) {
-    el.innerText = `Justyna ahead by ${gap} km`;
+    el.innerText = `🟣 Justyna ahead by ${gap} km`;
     el.style.color = "purple";
   } else {
-    el.innerText = `Raymond ahead by ${gap} km`;
+    el.innerText = `🟢 Raymond ahead by ${gap} km`;
     el.style.color = "green";
   }
 }
 
-/* ---------------- INDEX ---------------- */
 function getIndexFromKm(km) {
   const target = km * 1000;
-
   for (let i = 0; i < cumDist.length; i++) {
     if (cumDist[i] >= target) return i;
   }
   return cumDist.length - 1;
 }
 
-/* ---------------- 👻 GHOST (FULLY ISOLATED) ---------------- */
 const startDate = new Date("2026-06-27");
 const kmPerDay = 6.58;
 
-function computeGhostKm() {
+function updateGhost() {
+  if (!realTrail.length) return;
+
   const now = new Date();
   const day = Math.max(
     1,
     Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1
   );
-  return { day, km: day * kmPerDay };
+
+  const km = day * kmPerDay;
+
+  document.getElementById("optDay").innerText = day;
+  document.getElementById("optText").innerText = km.toFixed(3) + " km";
+
+  document.getElementById("optBar").style.width =
+    Math.min((km / 890) * 100, 100) + "%";
+
+  ghost.setLatLng(realTrail[getIndexFromKm(km)]);
 }
 
-function updateGhost() {
-  if (!realTrail.length) return;
-
-  const g = computeGhostKm();
-
-  document.getElementById("optDay").innerText = g.day;
-  document.getElementById("optText").innerText = g.km.toFixed(3) + " km";
-
-  const percent = Math.min((g.km / 890) * 100, 100);
-  document.getElementById("optBar").style.width = percent + "%";
-
-  ghost.setLatLng(realTrail[getIndexFromKm(g.km)]);
-}
-
-/* ---------------- GPX ---------------- */
 fetch("Bruce_Trail.gpx")
   .then(res => res.text())
   .then(gpxText => {
@@ -238,9 +218,7 @@ fetch("Bruce_Trail.gpx")
 
     cumDist = [0];
     for (let i = 1; i < realTrail.length; i++) {
-      cumDist.push(
-        cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
-      );
+      cumDist.push(cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i]));
     }
 
     L.polyline(realTrail, {
@@ -249,14 +227,24 @@ fetch("Bruce_Trail.gpx")
       opacity: 0.8
     }).addTo(map);
 
-    justyna.setLatLng(realTrail[0]);
-    raymond.setLatLng(realTrail[0]);
-    ghost.setLatLng(realTrail[0]);
+    // ✅ LOAD SAVED VALUES (THIS FIXES YOUR PROBLEM)
+    const savedJ = parseFloat(localStorage.getItem("justynaKm")) || 0;
+    const savedR = parseFloat(localStorage.getItem("raymondKm")) || 0;
 
+    document.getElementById("justynaKm").value = savedJ;
+    document.getElementById("raymondKm").value = savedR;
+
+    justyna.setLatLng(realTrail[getIndexFromKm(savedJ)]);
+    raymond.setLatLng(realTrail[getIndexFromKm(savedR)]);
+
+    updateUI("j", savedJ);
+    updateUI("r", savedR);
+    updateLeader(savedJ, savedR);
+
+    ghost.setLatLng(realTrail[0]);
     updateGhost();
   });
 
-/* ---------------- MOVEMENT ---------------- */
 function moveJustyna() {
   if (!realTrail.length) return;
 
@@ -265,7 +253,6 @@ function moveJustyna() {
   justyna.setLatLng(realTrail[getIndexFromKm(km)]);
   updateUI("j", km);
   updateLeader(km, Number(document.getElementById("raymondKm").value) || 0);
-
   updateGhost();
 }
 
@@ -277,11 +264,9 @@ function moveRaymond() {
   raymond.setLatLng(realTrail[getIndexFromKm(km)]);
   updateUI("r", km);
   updateLeader(Number(document.getElementById("justynaKm").value) || 0, km);
-
   updateGhost();
 }
 
-/* ---------------- SAVE (UNCHANGED SAFE) ---------------- */
 function saveProgress() {
   localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
   localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
