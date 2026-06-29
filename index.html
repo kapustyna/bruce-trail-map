@@ -4,7 +4,7 @@
   <title>bruce-trail-map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet map library -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -24,7 +24,7 @@
 <h3>Raymond 🟢</h3>
 <input id="raymondKm" type="number" placeholder="Enter km">
 <button onclick="moveRaymond()">Move</button>
-  
+
 <div id="map"></div>
 
 <script>
@@ -42,23 +42,49 @@ var trail = [
   [45.0, -81.0]
 ];
 
+// trail line
 L.polyline(trail, { color: 'brown' }).addTo(map);
 
-var justynaMarker = L.marker(trail[0]).addTo(map);
-var raymondMarker = L.marker(trail[0]).addTo(map);
+// 🟣 Justyna marker
+var justynaIcon = L.divIcon({
+  className: "custom-icon",
+  html: '<div style="background: purple; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
+});
 
+var justyna = L.marker(trail[0], { icon: justynaIcon }).addTo(map);
+
+// 🟢 Raymond marker
+var raymondIcon = L.divIcon({
+  className: "custom-icon",
+  html: '<div style="background: green; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
+});
+
+var raymond = L.marker(trail[0], { icon: raymondIcon }).addTo(map);
+
+// MOVE JUSTYNA
 function moveJustyna() {
   let km = Number(document.getElementById("justynaKm").value);
+
   let index = Math.floor(km / 10);
+
+  if (isNaN(index)) return;
+  if (index < 0) index = 0;
   if (index >= trail.length) index = trail.length - 1;
-  justynaMarker.setLatLng(trail[index]);
+
+  justyna.setLatLng(trail[index]);
 }
 
+// MOVE RAYMOND
 function moveRaymond() {
   let km = Number(document.getElementById("raymondKm").value);
+
   let index = Math.floor(km / 10);
+
+  if (isNaN(index)) return;
+  if (index < 0) index = 0;
   if (index >= trail.length) index = trail.length - 1;
-  raymondMarker.setLatLng(trail[index]);
+
+  raymond.setLatLng(trail[index]);
 }
 </script>
 
