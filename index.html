@@ -11,6 +11,8 @@
   <style>
     #map { height: 90vh; }
   </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
 </head>
 
 <body>
@@ -34,24 +36,16 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-var trail = [
-  [43.1, -79.1],
-  [43.5, -79.8],
-  [44.0, -80.2],
-  [44.6, -80.8],
-  [45.0, -81.0]
-];
-
-// trail line
-L.polyline(trail, { color: 'brown' }).addTo(map);
+// real trail storage
+let realTrail = [];
 
 // 🟣 Justyna marker
 var justynaIcon = L.divIcon({
   className: "custom-icon",
-  html: '<div style="background: purple; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
+  html: '<div style="background: lavender; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
 });
 
-var justyna = L.marker(trail[0], { icon: justynaIcon }).addTo(map);
+var justyna = L.marker([43.1, -79.1], { icon: justynaIcon }).addTo(map);
 
 // 🟢 Raymond marker
 var raymondIcon = L.divIcon({
@@ -59,32 +53,55 @@ var raymondIcon = L.divIcon({
   html: '<div style="background: green; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
 });
 
-var raymond = L.marker(trail[0], { icon: raymondIcon }).addTo(map);
+var raymond = L.marker([43.1, -79.1], { icon: raymondIcon }).addTo(map);
+
+// LOAD GPX FILE
+fetch("Bruce_Trail.gpx")
+  .then(res => res.text())
+  .then(gpxText => {
+
+    const parser = new DOMParser();
+    const gpx = parser.parseFromString(gpxText, "text/xml");
+
+    const geoJson = toGeoJSON.gpx(gpx);
+
+    realTrail = geoJson.features[0].geometry.coordinates
+      .map(c => [c[1], c[0]]);
+
+    // draw real trail
+    L.polyline(realTrail, { color: "brown" }).addTo(map);
+
+    // start markers
+    justyna.setLatLng(realTrail[0]);
+    raymond.setLatLng(realTrail[0]);
+  });
 
 // MOVE JUSTYNA
 function moveJustyna() {
+  if (!realTrail.length) return;
+
   let km = Number(document.getElementById("justynaKm").value);
 
-  let index = Math.floor(km / 10);
+  let index = Math.floor(km * 10);
 
-  if (isNaN(index)) return;
   if (index < 0) index = 0;
-  if (index >= trail.length) index = trail.length - 1;
+  if (index >= realTrail.length) index = realTrail.length - 1;
 
-  justyna.setLatLng(trail[index]);
+  justyna.setLatLng(realTrail[index]);
 }
 
 // MOVE RAYMOND
 function moveRaymond() {
+  if (!realTrail.length) return;
+
   let km = Number(document.getElementById("raymondKm").value);
 
-  let index = Math.floor(km / 10);
+  let index = Math.floor(km * 10);
 
-  if (isNaN(index)) return;
   if (index < 0) index = 0;
-  if (index >= trail.length) index = trail.length - 1;
+  if (index >= realTrail.length) index = realTrail.length - 1;
 
-  raymond.setLatLng(trail[index]);
+  raymond.setLatLng(realTrail[index]);
 }
 </script>
 
