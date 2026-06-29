@@ -9,46 +9,74 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
 
   <style>
-    body {
-      font-family: Consolas, "Courier New", monospace;
-      font-weight: bold;
-    }
+body {
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: bold;
+  margin: 8px;
+}
 
-    #map {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      max-height: 80vh;
-      border-radius: 12px;
-    }
+/* 🗺 square map */
+#map {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 75vh;
+  border-radius: 12px;
+  margin-top: 6px;
+}
 
-    @media (max-width: 768px) {
-      #map {
-        max-height: 70vh;
-      }
-    }
+/* compact header */
+h2 {
+  margin: 6px 0 8px 0;
+  font-size: 18px;
+}
 
-    .bar {
-      width: 100%;
-      background: #ddd;
-      height: 12px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      overflow: hidden;
-    }
+h3 {
+  margin: 6px 0 4px 0;
+  font-size: 14px;
+}
 
-    .fill {
-      height: 12px;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
+/* player blocks */
+.player {
+  margin-bottom: 6px;
+}
 
-    button {
-      margin: 5px 0;
-      padding: 6px 10px;
-      font-family: inherit;
-      font-weight: bold;
-      cursor: pointer;
-    }
+/* inputs */
+input {
+  width: 90px;
+  padding: 3px;
+  font-size: 12px;
+}
+
+button {
+  margin: 2px 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* text */
+p {
+  margin: 3px 0;
+  font-size: 12px;
+}
+
+/* progress bars */
+.bar {
+  width: 100%;
+  background: #ddd;
+  height: 8px;
+  margin: 4px 0 6px 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 8px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
   </style>
 </head>
 
@@ -56,27 +84,31 @@
 
 <h2>QUEST #1: BRUCE TRAIL 🥾🌳</h2>
 
-<h3>🟣JUSTYNA</h3>
-<input id="justynaKm" type="number" step="0.001" placeholder="Enter km">
-<button onclick="moveJustyna()">Move</button>
+<!-- 🟣 JUSTYNA -->
+<div class="player">
+  <h3>🟣 JUSTYNA</h3>
+  <input id="justynaKm" type="number" step="0.001">
+  <button onclick="moveJustyna()">Move</button>
 
-<p>Progress: <span id="jText">0</span> / 890 km</p>
-<div class="bar">
-  <div id="jBar" class="fill" style="background: purple;"></div>
+  <p>Progress: <span id="jText">0</span> / 890 km</p>
+  <div class="bar">
+    <div id="jBar" class="fill" style="background: purple;"></div>
+  </div>
 </div>
 
-<h3>🟢RAYMOND</h3>
-<input id="raymondKm" type="number" step="0.001" placeholder="Enter km">
-<button onclick="moveRaymond()">Move</button>
+<!-- 🟢 RAYMOND -->
+<div class="player">
+  <h3>🟢 RAYMOND</h3>
+  <input id="raymondKm" type="number" step="0.001">
+  <button onclick="moveRaymond()">Move</button>
 
-<p>Progress: <span id="rText">0</span> / 890 km</p>
-<div class="bar">
-  <div id="rBar" class="fill" style="background: green;"></div>
+  <p>Progress: <span id="rText">0</span> / 890 km</p>
+  <div class="bar">
+    <div id="rBar" class="fill" style="background: green;"></div>
+  </div>
 </div>
 
-<h3>⚪THE OPTIMAL GHOST</h3>
-<p id="optText">Optimal: 0 km</p>
-
+<!-- 🏁 STATUS -->
 <h3>RACE STATUS</h3>
 <p id="leaderText">Waiting for movement...</p>
 
@@ -94,7 +126,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let realTrail = [];
 let cumDist = [];
 
-/* -------------------- DISTANCE -------------------- */
+/* ---------------- DISTANCE ---------------- */
 function haversine(a, b) {
   const R = 6371000;
   const toRad = x => x * Math.PI / 180;
@@ -102,34 +134,29 @@ function haversine(a, b) {
   const dLat = toRad(b[0] - a[0]);
   const dLng = toRad(b[1] - a[1]);
 
-  const lat1 = toRad(a[0]);
-  const lat2 = toRad(b[0]);
-
   const x =
     Math.sin(dLat / 2) ** 2 +
-    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+    Math.sin(dLng / 2) ** 2 *
+    Math.cos(toRad(a[0])) *
+    Math.cos(toRad(b[0]));
 
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-/* -------------------- MARKERS -------------------- */
-var justynaIcon = L.divIcon({
-  html: '<div style="background: purple; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
-});
+/* ---------------- MARKERS ---------------- */
+var justyna = L.marker([43.1, -79.1], {
+  icon: L.divIcon({
+    html: '<div style="background: purple; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
+  })
+}).addTo(map);
 
-var raymondIcon = L.divIcon({
-  html: '<div style="background: green; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
-});
+var raymond = L.marker([43.1, -79.1], {
+  icon: L.divIcon({
+    html: '<div style="background: green; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white;"></div>'
+  })
+}).addTo(map);
 
-var optIcon = L.divIcon({
-  html: '<div style="background: white; width: 12px; height: 12px; border-radius: 50%; border: 2px solid black;"></div>'
-});
-
-var justyna = L.marker([43.1, -79.1], { icon: justynaIcon }).addTo(map);
-var raymond = L.marker([43.1, -79.1], { icon: raymondIcon }).addTo(map);
-var optimal = L.marker([43.1, -79.1], { icon: optIcon }).addTo(map);
-
-/* -------------------- UI -------------------- */
+/* ---------------- UI ---------------- */
 function updateUI(prefix, km) {
   const total = 890;
   const percent = Math.min((km / total) * 100, 100);
@@ -143,38 +170,15 @@ function updateLeader(jKm, rKm) {
   const el = document.getElementById("leaderText");
 
   if (jKm > rKm) {
-    el.innerText = `Justyna is ahead by ${gap} km`;
+    el.innerText = `🟣 Justyna ahead by ${gap} km`;
     el.style.color = "purple";
   } else {
-    el.innerText = `Raymond is ahead by ${gap} km`;
+    el.innerText = `🟢 Raymond ahead by ${gap} km`;
     el.style.color = "green";
   }
 }
 
-/* -------------------- OPTIMAL MODEL -------------------- */
-const kmPerDay = 890 / 135; // ≈ 6.58 km/day
-const startDate = new Date("2026-06-27");
-
-function getOptimalDay() {
-  const now = new Date();
-  let day = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
-  return Math.max(1, day + 1); // START AT DAY 1
-}
-
-function updateOptimal() {
-  if (!realTrail.length) return;
-
-  const day = getOptimalDay();
-  const optimalKm = day * kmPerDay;
-
-  document.getElementById("optText").innerText =
-    `Optimal: ${optimalKm.toFixed(2)} km (Day ${day})`;
-
-  const index = getIndexFromKm(optimalKm);
-  optimal.setLatLng(realTrail[index]);
-}
-
-/* -------------------- GPX -------------------- */
+/* ---------------- GPX ---------------- */
 fetch("Bruce_Trail.gpx")
   .then(res => res.text())
   .then(gpxText => {
@@ -185,18 +189,19 @@ fetch("Bruce_Trail.gpx")
 
     realTrail = [];
 
-    geoJson.features.forEach(feature => {
-      if (feature.geometry && feature.geometry.type === "LineString") {
-        const coords = feature.geometry.coordinates.map(c => [c[1], c[0]]);
-        realTrail = realTrail.concat(coords);
+    geoJson.features.forEach(f => {
+      if (f.geometry?.type === "LineString") {
+        realTrail = realTrail.concat(
+          f.geometry.coordinates.map(c => [c[1], c[0]])
+        );
       }
     });
 
     cumDist = [0];
-
     for (let i = 1; i < realTrail.length; i++) {
-      const d = haversine(realTrail[i - 1], realTrail[i]);
-      cumDist.push(cumDist[i - 1] + d);
+      cumDist.push(
+        cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
+      );
     }
 
     L.polyline(realTrail, {
@@ -207,12 +212,9 @@ fetch("Bruce_Trail.gpx")
 
     justyna.setLatLng(realTrail[0]);
     raymond.setLatLng(realTrail[0]);
-    optimal.setLatLng(realTrail[0]);
-
-    updateOptimal();
   });
 
-/* -------------------- INDEX -------------------- */
+/* ---------------- KM → INDEX ---------------- */
 function getIndexFromKm(km) {
   const target = km * 1000;
 
@@ -222,7 +224,7 @@ function getIndexFromKm(km) {
   return cumDist.length - 1;
 }
 
-/* -------------------- MOVEMENT -------------------- */
+/* ---------------- MOVEMENT ---------------- */
 function moveJustyna() {
   if (!realTrail.length) return;
 
@@ -232,8 +234,6 @@ function moveJustyna() {
   justyna.setLatLng(realTrail[index]);
   updateUI("j", km);
   updateLeader(km, Number(document.getElementById("raymondKm").value) || 0);
-
-  updateOptimal();
 }
 
 function moveRaymond() {
@@ -245,19 +245,14 @@ function moveRaymond() {
   raymond.setLatLng(realTrail[index]);
   updateUI("r", km);
   updateLeader(Number(document.getElementById("justynaKm").value) || 0, km);
-
-  updateOptimal();
 }
 
-/* -------------------- SAVE -------------------- */
+/* ---------------- SAVE ---------------- */
 function saveProgress() {
   localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
   localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
   alert("💾 Saved!");
 }
-
-/* auto refresh optimal */
-setInterval(updateOptimal, 1000 * 60 * 60);
 </script>
 
 </body>
