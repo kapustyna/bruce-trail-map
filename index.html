@@ -101,7 +101,7 @@ p {
   </p>
 
   <div class="bar">
-    <div id="optBar" class="fill" style="background: #444;"></div>
+    <div id="optBar" class="fill" style="background: #black;"></div>
   </div>
 </div>
 
@@ -154,7 +154,7 @@ var raymond = L.marker([43.1, -79.1], {
 
 var ghost = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    html: '<div style="background:#444;width:12px;height:12px;border-radius:50%;border:2px solid black;"></div>'
+    html: '<div style="background:#white;width:12px;height:12px;border-radius:50%;border:2px solid black;"></div>'
   })
 }).addTo(map);
 
@@ -190,32 +190,34 @@ function getIndexFromKm(km) {
   return cumDist.length - 1;
 }
 
-/* ---------------- GHOST (SAFE, NO SAVE INTERFERENCE) ---------------- */
+/* ---------------- 👻 GHOST (FULLY ISOLATED) ---------------- */
 const startDate = new Date("2026-06-27");
 const kmPerDay = 6.58;
 
-function updateGhost() {
-  if (!realTrail.length) return;
-
+function computeGhostKm() {
   const now = new Date();
-
   const day = Math.max(
     1,
     Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1
   );
-
-  const km = day * kmPerDay;
-
-  document.getElementById("optDay").innerText = day;
-  document.getElementById("optText").innerText = km.toFixed(3) + " km";
-
-  const percent = Math.min((km / 890) * 100, 100);
-  document.getElementById("optBar").style.width = percent + "%";
-
-  ghost.setLatLng(realTrail[getIndexFromKm(km)]);
+  return { day, km: day * kmPerDay };
 }
 
-/* ---------------- LOAD GPX ---------------- */
+function updateGhost() {
+  if (!realTrail.length) return;
+
+  const g = computeGhostKm();
+
+  document.getElementById("optDay").innerText = g.day;
+  document.getElementById("optText").innerText = g.km.toFixed(3) + " km";
+
+  const percent = Math.min((g.km / 890) * 100, 100);
+  document.getElementById("optBar").style.width = percent + "%";
+
+  ghost.setLatLng(realTrail[getIndexFromKm(g.km)]);
+}
+
+/* ---------------- GPX ---------------- */
 fetch("Bruce_Trail.gpx")
   .then(res => res.text())
   .then(gpxText => {
@@ -235,7 +237,6 @@ fetch("Bruce_Trail.gpx")
     });
 
     cumDist = [0];
-
     for (let i = 1; i < realTrail.length; i++) {
       cumDist.push(
         cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
@@ -264,6 +265,7 @@ function moveJustyna() {
   justyna.setLatLng(realTrail[getIndexFromKm(km)]);
   updateUI("j", km);
   updateLeader(km, Number(document.getElementById("raymondKm").value) || 0);
+
   updateGhost();
 }
 
@@ -275,10 +277,11 @@ function moveRaymond() {
   raymond.setLatLng(realTrail[getIndexFromKm(km)]);
   updateUI("r", km);
   updateLeader(Number(document.getElementById("justynaKm").value) || 0, km);
+
   updateGhost();
 }
 
-/* ---------------- SAVE (SAFE + ISOLATED) ---------------- */
+/* ---------------- SAVE (UNCHANGED SAFE) ---------------- */
 function saveProgress() {
   localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
   localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
