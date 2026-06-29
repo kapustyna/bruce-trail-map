@@ -135,11 +135,17 @@ function haversine(a, b) {
 }
 
 var justyna = L.marker([43.1, -79.1], {
-  icon: L.divIcon({ html: '<div style="background:purple;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>' })
+  icon: L.divIcon({
+    className: "",
+    html: '<div style="font-size:18px; filter: drop-shadow(0 0 4px #00c8ff);">🟣</div>'
+  })
 }).addTo(map);
 
 var raymond = L.marker([43.1, -79.1], {
-  icon: L.divIcon({ html: '<div style="background:green;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>' })
+  icon: L.divIcon({
+    className: "",
+    html: '<div style="font-size:18px; filter: drop-shadow(0 0 4px #00c8ff);">🟢</div>'
+  })
 }).addTo(map);
 
 var ghost = L.marker([43.1, -79.1], {
