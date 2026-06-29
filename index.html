@@ -14,31 +14,35 @@ body {
   font-weight: bold;
 }
 
-    #map {
-  height: 65vh;
+/* 🟩 SQUARE MAP (NEW) */
+#map {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 80vh;
   border-radius: 12px;
 }
 
+/* 📱 Mobile safety */
 @media (max-width: 768px) {
   #map {
-    height: 55vh;
+    max-height: 70vh;
   }
 }
 
-    .bar {
-      width: 100%;
-      background: #ddd;
-      height: 12px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      overflow: hidden;
-    }
+.bar {
+  width: 100%;
+  background: #ddd;
+  height: 12px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
 
-    .fill {
-      height: 12px;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
+.fill {
+  height: 12px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
   </style>
 </head>
 
