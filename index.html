@@ -17,13 +17,13 @@
 
 <h2>Justyna & Raymond Take on The Bruce Trail</h2>
 
-<input id="km" type="number" placeholder="Enter km walked">
+<input id="km" type="number" placeholder="Enter km">
 <button onclick="move()">Move</button>
   
 <div id="map"></div>
 
 <script>
- var map = L.map('map').setView([43.1, -79.1], 8);
+var map = L.map('map').setView([43.1, -79.1], 8);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
@@ -39,13 +39,17 @@ var trail = [
 
 L.polyline(trail, { color: 'brown' }).addTo(map);
 
-// marker starts at beginning
 var marker = L.marker(trail[0]).addTo(map);
 
-// movement system
-function moveAlongTrail(km) {
-  // simple mapping: 10km per step (we refine later)
+// SIMPLE GLOBAL FUNCTION (no window, no confusion)
+function move() {
+  let km = document.getElementById("km").value;
+
+  km = Number(km);
+
   let index = Math.floor(km / 10);
+
+  if (isNaN(index)) return;
 
   if (index < 0) index = 0;
   if (index >= trail.length) index = trail.length - 1;
@@ -53,11 +57,6 @@ function moveAlongTrail(km) {
   marker.setLatLng(trail[index]);
 }
 </script>
-
-function move() {
-  let km = document.getElementById("km").value;
-  moveAlongTrail(km);
-}
 
 </body>
 </html>
