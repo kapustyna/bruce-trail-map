@@ -118,6 +118,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let realTrail = [];
 let cumDist = [];
 
+/* ---------------- DISTANCE ---------------- */
 function haversine(a, b) {
   const R = 6371000;
   const toRad = x => x * Math.PI / 180;
@@ -134,27 +135,26 @@ function haversine(a, b) {
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
+/* ---------------- MARKERS ---------------- */
 var justyna = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    className: "",
-    html: '<div style="font-size:18px; ">🟣</div>'
+    html: '<div style="font-size:18px;">🟣</div>'
   })
 }).addTo(map);
 
 var raymond = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    className: "",
-    html: '<div style="font-size:18px; ">🟢</div>'
+    html: '<div style="font-size:18px;">🟢</div>'
   })
 }).addTo(map);
 
 var ghost = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    className: "",
-    html: '<div style="font-size:18px; ">👻</div>'
+    html: '<div style="font-size:18px;">👻</div>'
   })
 }).addTo(map);
 
+/* ---------------- UI ---------------- */
 function updateUI(prefix, km) {
   const total = 890;
   const percent = Math.min((km / total) * 100, 100);
@@ -176,6 +176,19 @@ function updateLeader(jKm, rKm) {
   }
 }
 
+/* ---------------- TORONTO TIME FIX ---------------- */
+function getTorontoDate() {
+  return new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "America/Toronto"
+    })
+  );
+}
+
+const startDate = new Date("2026-06-27T00:00:00-04:00");
+const kmPerDay = 6.58;
+
+/* ---------------- INDEX ---------------- */
 function getIndexFromKm(km) {
   const target = km * 1000;
   for (let i = 0; i < cumDist.length; i++) {
@@ -184,13 +197,12 @@ function getIndexFromKm(km) {
   return cumDist.length - 1;
 }
 
-const startDate = new Date("2026-06-27");
-const kmPerDay = 6.58;
-
+/* ---------------- 👻 GHOST (FIXED TORONTO DAY LOGIC) ---------------- */
 function updateGhost() {
   if (!realTrail.length) return;
 
-  const now = new Date();
+  const now = getTorontoDate();
+
   const day = Math.max(
     1,
     Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1
@@ -207,6 +219,7 @@ function updateGhost() {
   ghost.setLatLng(realTrail[getIndexFromKm(km)]);
 }
 
+/* ---------------- LOAD GPX ---------------- */
 fetch("Bruce_Trail.gpx")
   .then(res => res.text())
   .then(gpxText => {
@@ -227,7 +240,9 @@ fetch("Bruce_Trail.gpx")
 
     cumDist = [0];
     for (let i = 1; i < realTrail.length; i++) {
-      cumDist.push(cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i]));
+      cumDist.push(
+        cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
+      );
     }
 
     L.polyline(realTrail, {
@@ -236,7 +251,7 @@ fetch("Bruce_Trail.gpx")
       opacity: 0.8
     }).addTo(map);
 
-    // ✅ LOAD SAVED VALUES (THIS FIXES YOUR PROBLEM)
+    // LOAD SAVED VALUES (SAFE)
     const savedJ = parseFloat(localStorage.getItem("justynaKm")) || 0;
     const savedR = parseFloat(localStorage.getItem("raymondKm")) || 0;
 
@@ -245,31 +260,25 @@ fetch("Bruce_Trail.gpx")
 
     justyna.setLatLng(realTrail[getIndexFromKm(savedJ)]);
     raymond.setLatLng(realTrail[getIndexFromKm(savedR)]);
+    ghost.setLatLng(realTrail[0]);
 
     updateUI("j", savedJ);
     updateUI("r", savedR);
     updateLeader(savedJ, savedR);
-
-    ghost.setLatLng(realTrail[0]);
     updateGhost();
 
-    // 🏁 START FLAG
-L.marker(realTrail[0], {
-  icon: L.divIcon({
-    html: '<div style="font-size:18px;">🚩</div>',
-    className: ""
-  })
-}).addTo(map);
+    // START FLAG
+    L.marker(realTrail[0], {
+      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
+    }).addTo(map);
 
-// 🏁 FINISH FLAG
-L.marker(realTrail[realTrail.length - 1], {
-  icon: L.divIcon({
-    html: '<div style="font-size:18px;">🏁</div>',
-    className: ""
-  })
-}).addTo(map);
+    // FINISH FLAG
+    L.marker(realTrail[realTrail.length - 1], {
+      icon: L.divIcon({ html: '<div style="font-size:18px;">🏁</div>' })
+    }).addTo(map);
   });
 
+/* ---------------- MOVEMENT ---------------- */
 function moveJustyna() {
   if (!realTrail.length) return;
 
@@ -292,6 +301,7 @@ function moveRaymond() {
   updateGhost();
 }
 
+/* ---------------- SAVE (UNCHANGED SAFE) ---------------- */
 function saveProgress() {
   localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
   localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
