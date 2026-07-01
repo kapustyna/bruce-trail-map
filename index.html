@@ -62,18 +62,6 @@ p {
   width: 0%;
   transition: width 0.3s ease;
 }
-
-/* ✅ FIX: remove white box around emoji markers */
-.emoji-icon {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-.leaflet-div-icon {
-  background: transparent !important;
-  border: none !important;
-}
-
   </style>
 </head>
 
@@ -147,24 +135,21 @@ function haversine(a, b) {
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-/* ---------------- MARKERS (FIXED EMOJIS) ---------------- */
+/* ---------------- MARKERS ---------------- */
 var justyna = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    className: "emoji-icon",
     html: '<div style="font-size:18px;">🟣</div>'
   })
 }).addTo(map);
 
 var raymond = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    className: "emoji-icon",
     html: '<div style="font-size:18px;">🟢</div>'
   })
 }).addTo(map);
 
 var ghost = L.marker([43.1, -79.1], {
   icon: L.divIcon({
-    className: "emoji-icon",
     html: '<div style="font-size:18px;">👻</div>'
   })
 }).addTo(map);
@@ -191,6 +176,18 @@ function updateLeader(jKm, rKm) {
   }
 }
 
+/* ---------------- TORONTO TIME FIX ---------------- */
+function getTorontoDate() {
+  return new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "America/Toronto"
+    })
+  );
+}
+
+const startDate = new Date("2026-06-27T00:00:00-04:00");
+const kmPerDay = 6.58;
+
 /* ---------------- INDEX ---------------- */
 function getIndexFromKm(km) {
   const target = km * 1000;
@@ -200,14 +197,12 @@ function getIndexFromKm(km) {
   return cumDist.length - 1;
 }
 
-/* ---------------- GHOST ---------------- */
-const startDate = new Date("2026-06-27");
-const kmPerDay = 6.58;
-
+/* ---------------- 👻 GHOST (FIXED TORONTO DAY LOGIC) ---------------- */
 function updateGhost() {
   if (!realTrail.length) return;
 
-  const now = new Date();
+  const now = getTorontoDate();
+
   const day = Math.max(
     1,
     Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1
@@ -245,7 +240,9 @@ fetch("Bruce_Trail.gpx")
 
     cumDist = [0];
     for (let i = 1; i < realTrail.length; i++) {
-      cumDist.push(cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i]));
+      cumDist.push(
+        cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
+      );
     }
 
     L.polyline(realTrail, {
@@ -254,6 +251,7 @@ fetch("Bruce_Trail.gpx")
       opacity: 0.8
     }).addTo(map);
 
+    // LOAD SAVED VALUES (SAFE)
     const savedJ = parseFloat(localStorage.getItem("justynaKm")) || 0;
     const savedR = parseFloat(localStorage.getItem("raymondKm")) || 0;
 
@@ -262,13 +260,22 @@ fetch("Bruce_Trail.gpx")
 
     justyna.setLatLng(realTrail[getIndexFromKm(savedJ)]);
     raymond.setLatLng(realTrail[getIndexFromKm(savedR)]);
+    ghost.setLatLng(realTrail[0]);
 
     updateUI("j", savedJ);
     updateUI("r", savedR);
     updateLeader(savedJ, savedR);
-
-    ghost.setLatLng(realTrail[0]);
     updateGhost();
+
+    // START FLAG
+    L.marker(realTrail[0], {
+      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
+    }).addTo(map);
+
+    // FINISH FLAG
+    L.marker(realTrail[realTrail.length - 1], {
+      icon: L.divIcon({ html: '<div style="font-size:18px;">🏁</div>' })
+    }).addTo(map);
   });
 
 /* ---------------- MOVEMENT ---------------- */
@@ -294,7 +301,7 @@ function moveRaymond() {
   updateGhost();
 }
 
-/* ---------------- SAVE ---------------- */
+/* ---------------- SAVE (UNCHANGED SAFE) ---------------- */
 function saveProgress() {
   localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
   localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
