@@ -9,6 +9,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
 
   <style>
+
+    /* 🚨 REMOVE WHITE BOX AROUND LEAFLET EMOJI MARKERS */
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* extra safety for inner div */
+.leaflet-marker-icon div {
+  background: transparent !important;
+}
+    
 body {
   font-family: Consolas, "Courier New", monospace;
   font-weight: bold;
