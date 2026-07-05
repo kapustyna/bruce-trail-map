@@ -285,6 +285,11 @@ fetch("Bruce_Trail.gpx")
       icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
     }).addTo(map);
 
+    // Sec 1 FLAG
+    L.marker(realTrail[2054], {
+      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
+    }).addTo(map);
+    
     // FINISH FLAG
     L.marker(realTrail[realTrail.length - 1], {
       icon: L.divIcon({ html: '<div style="font-size:18px;">🏁</div>' })
