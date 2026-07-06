@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>bruce-trail-map</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,12 +48,13 @@ h3 {
 }
 
 .player {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .badges {
   font-size: 20px;
   min-height: 22px;
+  letter-spacing: 2px;
 }
 
 input {
@@ -91,6 +93,7 @@ p {
 }
 
 </style>
+
 </head>
 
 <body>
@@ -150,19 +153,18 @@ Day <span id="optDay">1</span> |
 
 <h3>🏁 RACE STATUS</h3>
 
-<p id="leaderText">
-Waiting for movement...
-</p>
+<p id="leaderText">Waiting for movement...</p>
 
 <button onclick="saveProgress()">💾 Save</button>
 
 <div id="map"></div>
 
 <script>
+
 var map = L.map('map').setView([43.1, -79.1], 8);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18
+  maxZoom: 18,
 }).addTo(map);
 
 let realTrail = [];
@@ -216,7 +218,8 @@ var ghost = L.marker([43.1, -79.1], {
 
 
 function updateUI(prefix, km) {
-  const percent = Math.min((km / 890) * 100, 100);
+  const total = 890;
+  const percent = Math.min((km / total) * 100, 100);
 
   document.getElementById(prefix + "Text").innerText =
     km.toFixed(3);
@@ -227,7 +230,6 @@ function updateUI(prefix, km) {
 
 
 function updateLeader(jKm, rKm) {
-
   const gap = Math.abs(jKm - rKm).toFixed(3);
   const el = document.getElementById("leaderText");
 
@@ -242,7 +244,6 @@ function updateLeader(jKm, rKm) {
 
 
 function getIndexFromKm(km) {
-
   const target = km * 1000;
 
   for (let i = 0; i < cumDist.length; i++) {
@@ -255,7 +256,7 @@ function getIndexFromKm(km) {
 }
 
 
-function setupCheckpointIndexes() {
+function buildCheckpointIndexes() {
 
   checkpointIndexes = [];
 
@@ -283,10 +284,10 @@ function setupCheckpointIndexes() {
 
 function updateBadges(trailIndex, player) {
 
-  let key = player + "Badges";
+  let storageKey = player + "Badges";
 
   let earned =
-    JSON.parse(localStorage.getItem(key)) || [];
+    JSON.parse(localStorage.getItem(storageKey)) || [];
 
 
   checkpointIndexes.forEach((flagIndex, badgeIndex) => {
@@ -302,21 +303,21 @@ function updateBadges(trailIndex, player) {
 
 
   localStorage.setItem(
-    key,
+    storageKey,
     JSON.stringify(earned)
   );
 
 
-  let display =
+  let badges =
     earned.map(() => "🎖️").join(" ");
 
 
   if (player === "justyna") {
-    document.getElementById("jBadge").innerHTML = display;
+    document.getElementById("jBadge").innerHTML = badges;
   }
 
   if (player === "raymond") {
-    document.getElementById("rBadge").innerHTML = display;
+    document.getElementById("rBadge").innerHTML = badges;
   }
 
 }
@@ -335,7 +336,12 @@ function loadBadges() {
     j.map(() => "🎖️").join(" ");
 
 
-  dofunction getTorontoDate() {
+  document.getElementById("rBadge").innerHTML =
+    r.map(() => "🎖️").join(" ");
+
+}
+
+function getTorontoDate() {
   return new Date(
     new Date().toLocaleString("en-US", {
       timeZone: "America/Toronto"
@@ -372,14 +378,12 @@ function updateGhost() {
   ghost.setLatLng(
     realTrail[getIndexFromKm(km)]
   );
+
 }
 
 
-
 fetch("Bruce_Trail.gpx")
-
 .then(res => res.text())
-
 .then(gpxText => {
 
   const parser = new DOMParser();
@@ -430,7 +434,7 @@ fetch("Bruce_Trail.gpx")
   }
 
 
-  setupCheckpointIndexes();
+  buildCheckpointIndexes();
 
 
   L.polyline(realTrail, {
@@ -489,7 +493,6 @@ fetch("Bruce_Trail.gpx")
   );
 
 
-
   updateUI("j", savedJ);
 
   updateUI("r", savedR);
@@ -514,10 +517,10 @@ fetch("Bruce_Trail.gpx")
   ghost.setLatLng(realTrail[0]);
 
   updateGhost();
-  cument.getElementById("rBadge").innerHTML =
-    r.map(() => "🎖️").join(" ");
 
-  function moveJustyna() {
+});
+
+function moveJustyna() {
 
   if (!realTrail.length) return;
 
@@ -529,10 +532,10 @@ fetch("Bruce_Trail.gpx")
 
   const index = getIndexFromKm(km);
 
-  const position = realTrail[index];
 
-
-  justyna.setLatLng(position);
+  justyna.setLatLng(
+    realTrail[index]
+  );
 
 
   updateUI("j", km);
@@ -570,10 +573,10 @@ function moveRaymond() {
 
   const index = getIndexFromKm(km);
 
-  const position = realTrail[index];
 
-
-  raymond.setLatLng(position);
+  raymond.setLatLng(
+    realTrail[index]
+  );
 
 
   updateUI("r", km);
