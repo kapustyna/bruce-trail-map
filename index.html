@@ -51,6 +51,12 @@ h3 {
   margin-bottom: 6px;
 }
 
+.playerTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .badges {
   font-size: 20px;
   min-height: 22px;
@@ -100,11 +106,11 @@ p {
 
 <h2>QUEST #1: BRUCE TRAIL 🥾🌳</h2>
 
+
 <div class="player">
 
-<h3>
-🟣 JUSTYNA
-<div id="jBadge" class="badges"></div>
+<h3 class="playerTitle">
+🟣 JUSTYNA <span id="jBadge" class="badges"></span><span id="jTrophy"></span>
 </h3>
 
 <input id="justynaKm" type="number" step="0.001">
@@ -121,11 +127,11 @@ Progress: <span id="jText">0</span> / 890 km
 </div>
 
 
+
 <div class="player">
 
-<h3>
-🟢 RAYMOND
-<div id="rBadge" class="badges"></div>
+<h3 class="playerTitle">
+🟢 RAYMOND <span id="rBadge" class="badges"></span><span id="rTrophy"></span>
 </h3>
 
 <input id="raymondKm" type="number" step="0.001">
@@ -142,6 +148,7 @@ Progress: <span id="rText">0</span> / 890 km
 </div>
 
 
+
 <h3>👻 OPTIMAL GHOST</h3>
 
 <p>
@@ -154,11 +161,13 @@ Day <span id="optDay">1</span> |
 </div>
 
 
+
 <h3>🏁 RACE STATUS</h3>
 
 <p id="leaderText">
 Waiting for movement...
 </p>
+
 
 
 <button onclick="saveProgress()">💾 Save</button>
@@ -175,9 +184,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
+
 let realTrail = [];
 let cumDist = [];
 let checkpointIndexes = [];
+
 
 const checkpoints = [
   [43.19132, -79.56467],
@@ -189,6 +200,7 @@ const checkpoints = [
   [44.49996, -80.63298],
   [44.74213, -81.13469]
 ];
+
 
 
 function haversine(a, b) {
@@ -229,6 +241,7 @@ var justyna = L.marker(
 ).addTo(map);
 
 
+
 var raymond = L.marker(
   [43.1, -79.1],
   {
@@ -239,6 +252,7 @@ var raymond = L.marker(
 ).addTo(map);
 
 
+
 var ghost = L.marker(
   [43.1, -79.1],
   {
@@ -247,8 +261,6 @@ var ghost = L.marker(
     })
   }
 ).addTo(map);
-
-
 
 function updateUI(prefix, km) {
 
@@ -364,6 +376,7 @@ function buildCheckpointIndexes() {
 
 
 
+
 function updateBadges(trailIndex, player) {
 
   let earned = [];
@@ -386,12 +399,23 @@ function updateBadges(trailIndex, player) {
     earned.map(() => "🎖️").join(" ");
 
 
+
+  let finished =
+    trailIndex >= realTrail.length - 1;
+
+
+
   if (player === "justyna") {
 
     document.getElementById("jBadge")
       .innerHTML = badges;
 
+
+    document.getElementById("jTrophy")
+      .innerHTML = finished ? " 🏆" : "";
+
   }
+
 
 
   if (player === "raymond") {
@@ -399,9 +423,16 @@ function updateBadges(trailIndex, player) {
     document.getElementById("rBadge")
       .innerHTML = badges;
 
+
+    document.getElementById("rTrophy")
+      .innerHTML = finished ? " 🏆" : "";
+
   }
 
 }
+
+
+
 
 function getTorontoDate() {
 
@@ -414,8 +445,10 @@ function getTorontoDate() {
 }
 
 
+
 const startDate =
   new Date("2026-06-27T00:00:00-04:00");
+
 
 
 const kmPerDay = 6.58;
@@ -441,17 +474,21 @@ function updateGhost() {
     );
 
 
+
   const km =
     day * kmPerDay;
+
 
 
   document.getElementById("optDay")
     .innerText = day;
 
 
+
   document.getElementById("optText")
     .innerText =
     km.toFixed(3) + " km";
+
 
 
   document.getElementById("optBar")
@@ -460,14 +497,254 @@ function updateGhost() {
     + "%";
 
 
+
   ghost.setLatLng(
     realTrail[getIndexFromKm(km)]
   );
 
 }
 
+function updateUI(prefix, km) {
+
+  const percent =
+    Math.min((km / 890) * 100, 100);
 
 
+  document.getElementById(
+    prefix + "Text"
+  ).innerText =
+    km.toFixed(3);
+
+
+  document.getElementById(
+    prefix + "Bar"
+  ).style.width =
+    percent + "%";
+
+}
+
+
+
+function updateLeader(jKm, rKm) {
+
+  const gap =
+    Math.abs(jKm - rKm).toFixed(3);
+
+
+  const el =
+    document.getElementById("leaderText");
+
+
+  if (jKm > rKm) {
+
+    el.innerText =
+      `Justyna ahead by ${gap} km`;
+
+    el.style.color =
+      "#9B59B6";
+
+  } else {
+
+    el.innerText =
+      `Raymond ahead by ${gap} km`;
+
+    el.style.color =
+      "#2ECC71";
+
+  }
+
+}
+
+
+
+function getIndexFromKm(km) {
+
+  const target =
+    km * 1000;
+
+
+  for (let i = 0; i < cumDist.length; i++) {
+
+    if (cumDist[i] >= target) {
+      return i;
+    }
+
+  }
+
+
+  return cumDist.length - 1;
+
+}
+
+
+
+function buildCheckpointIndexes() {
+
+  checkpointIndexes = [];
+
+
+  checkpoints.forEach(flag => {
+
+    let closest = 0;
+
+    let shortest =
+      Infinity;
+
+
+    realTrail.forEach((point, index) => {
+
+      let distance =
+        haversine(point, flag);
+
+
+      if (distance < shortest) {
+
+        shortest =
+          distance;
+
+        closest =
+          index;
+
+      }
+
+    });
+
+
+    checkpointIndexes.push(closest);
+
+  });
+
+}
+
+
+
+
+function updateBadges(trailIndex, player) {
+
+  let earned = [];
+
+
+  checkpointIndexes.forEach(
+    (flagIndex, badgeIndex) => {
+
+      if (trailIndex >= flagIndex) {
+
+        earned.push(badgeIndex);
+
+      }
+
+    }
+  );
+
+
+  let badges =
+    earned.map(() => "🎖️").join(" ");
+
+
+
+  let finished =
+    trailIndex >= realTrail.length - 1;
+
+
+
+  if (player === "justyna") {
+
+    document.getElementById("jBadge")
+      .innerHTML = badges;
+
+
+    document.getElementById("jTrophy")
+      .innerHTML = finished ? " 🏆" : "";
+
+  }
+
+
+
+  if (player === "raymond") {
+
+    document.getElementById("rBadge")
+      .innerHTML = badges;
+
+
+    document.getElementById("rTrophy")
+      .innerHTML = finished ? " 🏆" : "";
+
+  }
+
+}
+
+
+
+
+function getTorontoDate() {
+
+  return new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "America/Toronto"
+    })
+  );
+
+}
+
+
+
+const startDate =
+  new Date("2026-06-27T00:00:00-04:00");
+
+
+
+const kmPerDay = 6.58;
+
+
+
+function updateGhost() {
+
+  if (!realTrail.length) return;
+
+
+  const now =
+    getTorontoDate();
+
+
+  const day =
+    Math.max(
+      1,
+      Math.floor(
+        (now - startDate) /
+        (1000 * 60 * 60 * 24)
+      ) + 1
+    );
+
+
+
+  const km =
+    day * kmPerDay;
+
+
+
+  document.getElementById("optDay")
+    .innerText = day;
+
+
+
+  document.getElementById("optText")
+    .innerText =
+    km.toFixed(3) + " km";
+
+
+
+  document.getElementById("optBar")
+    .style.width =
+    Math.min((km / 890) * 100, 100)
+    + "%";
+
+
+
+  ghost.setLatLng(
+    realTrail[getIndexFromKm(km)]
+  );
+
+}
 
 fetch("Bruce_Trail.gpx")
 
@@ -558,6 +835,7 @@ fetch("Bruce_Trail.gpx")
 
 
 
+
   checkpoints.forEach(flag => {
 
 
@@ -574,6 +852,7 @@ fetch("Bruce_Trail.gpx")
 
 
   });
+
 
 
 
@@ -598,10 +877,12 @@ fetch("Bruce_Trail.gpx")
 
 
 
+
   const savedJ =
     parseFloat(
       localStorage.getItem("justynaKm")
     ) || 0;
+
 
 
 
@@ -613,12 +894,15 @@ fetch("Bruce_Trail.gpx")
 
 
 
+
   document.getElementById("justynaKm")
     .value = savedJ;
 
 
+
   document.getElementById("raymondKm")
     .value = savedR;
+
 
 
 
@@ -628,9 +912,11 @@ fetch("Bruce_Trail.gpx")
   );
 
 
+
   raymond.setLatLng(
     realTrail[getIndexFromKm(savedR)]
   );
+
 
 
 
@@ -640,10 +926,13 @@ fetch("Bruce_Trail.gpx")
   updateUI("r", savedR);
 
 
+
   updateLeader(
     savedJ,
     savedR
   );
+
+
 
 
 
@@ -653,10 +942,13 @@ fetch("Bruce_Trail.gpx")
   );
 
 
+
   updateBadges(
     getIndexFromKm(savedR),
     "raymond"
   );
+
+
 
 
 
@@ -665,14 +957,21 @@ fetch("Bruce_Trail.gpx")
   );
 
 
+
   updateGhost();
+
 
 
 });
 
+
+
+
+
 function moveJustyna() {
 
   if (!realTrail.length) return;
+
 
 
   const km =
@@ -681,8 +980,11 @@ function moveJustyna() {
     );
 
 
+
   const index =
     getIndexFromKm(km);
+
+
 
 
 
@@ -691,10 +993,16 @@ function moveJustyna() {
   );
 
 
+
+
+
   updateUI(
     "j",
     km
   );
+
+
+
 
 
   updateLeader(
@@ -705,10 +1013,16 @@ function moveJustyna() {
   );
 
 
+
+
+
   updateBadges(
     index,
     "justyna"
   );
+
+
+
 
 
   updateGhost();
@@ -718,9 +1032,11 @@ function moveJustyna() {
 
 
 
+
 function moveRaymond() {
 
   if (!realTrail.length) return;
+
 
 
   const km =
@@ -729,8 +1045,11 @@ function moveRaymond() {
     );
 
 
+
   const index =
     getIndexFromKm(km);
+
+
 
 
 
@@ -739,10 +1058,16 @@ function moveRaymond() {
   );
 
 
+
+
+
   updateUI(
     "r",
     km
   );
+
+
+
 
 
   updateLeader(
@@ -753,18 +1078,21 @@ function moveRaymond() {
   );
 
 
+
+
+
   updateBadges(
     index,
     "raymond"
   );
 
 
+
+
+
   updateGhost();
 
 }
-
-
-
 
 function saveProgress() {
 
@@ -775,18 +1103,20 @@ function saveProgress() {
   );
 
 
+
   localStorage.setItem(
     "raymondKm",
     document.getElementById("raymondKm").value
   );
 
 
+
   alert("💾 Saved!");
 
 }
 
-
 </script>
 
 </body>
+
 </html>
