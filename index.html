@@ -1,366 +1,905 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>bruce-trail-map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
+<title>bruce-trail-map</title>
 
-  <style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* 🚨 REMOVE WHITE BOX AROUND LEAFLET EMOJI MARKERS */
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
+
+
+<style>
+
+/* REMOVE WHITE BOX AROUND EMOJI MARKERS */
 .leaflet-div-icon {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-/* extra safety for inner div */
 .leaflet-marker-icon div {
   background: transparent !important;
 }
-    
+
+
 body {
   font-family: Consolas, "Courier New", monospace;
   font-weight: bold;
   margin: 8px;
 }
 
+
 #map {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 75vh;
-  border-radius: 12px;
-  margin-top: 6px;
+  width:100%;
+  aspect-ratio:1 / 1;
+  max-height:75vh;
+  border-radius:12px;
+  margin-top:6px;
 }
 
-h2 { margin: 6px 0 8px 0; font-size: 18px; }
-h3 { margin: 6px 0 4px 0; font-size: 14px; }
 
-.player { margin-bottom: 6px; }
+h2 {
+  margin:6px 0 8px 0;
+  font-size:18px;
+}
+
+
+h3 {
+  margin:6px 0 4px 0;
+  font-size:14px;
+}
+
+
+.player {
+  margin-bottom:10px;
+}
+
+
+.badges {
+  font-size:20px;
+  letter-spacing:3px;
+  min-height:22px;
+}
+
 
 input {
-  width: 90px;
-  padding: 3px;
-  font-size: 12px;
+  width:90px;
+  padding:3px;
+  font-size:12px;
 }
+
 
 button {
-  margin: 2px 0;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-family: inherit;
-  font-weight: bold;
-  cursor: pointer;
+  margin:2px 0;
+  padding:4px 8px;
+  font-size:12px;
+  font-family:inherit;
+  font-weight:bold;
+  cursor:pointer;
 }
+
 
 p {
-  margin: 3px 0;
-  font-size: 12px;
+  margin:3px 0;
+  font-size:12px;
 }
+
 
 .bar {
-  width: 100%;
-  background: #ddd;
-  height: 8px;
-  margin: 4px 0 6px 0;
-  border-radius: 6px;
-  overflow: hidden;
+  width:100%;
+  background:#ddd;
+  height:8px;
+  margin:4px 0 6px 0;
+  border-radius:6px;
+  overflow:hidden;
 }
 
+
 .fill {
-  height: 8px;
-  width: 0%;
-  transition: width 0.3s ease;
+  height:8px;
+  width:0%;
+  transition:width 0.3s ease;
 }
-  </style>
+
+
+</style>
+
 </head>
+
 
 <body>
 
+
 <h2>QUEST #1: BRUCE TRAIL 🥾🌳</h2>
 
-<div class="player">
-  <h3>🟣 JUSTYNA</h3>
-  <input id="justynaKm" type="number" step="0.001">
-  <button onclick="moveJustyna()">Move</button>
-
-  <p>Progress: <span id="jText">0</span> / 890 km</p>
-  <div class="bar">
-    <div id="jBar" class="fill" style="background: #9B59B6;"></div>
-  </div>
-</div>
 
 <div class="player">
-  <h3>🟢 RAYMOND</h3>
-  <input id="raymondKm" type="number" step="0.001">
-  <button onclick="moveRaymond()">Move</button>
 
-  <p>Progress: <span id="rText">0</span> / 890 km</p>
-  <div class="bar">
-    <div id="rBar" class="fill" style="background: #2ECC71;"></div>
-  </div>
-</div>
+<h3>
+🟣 JUSTYNA
+<div id="jBadge" class="badges"></div>
+</h3>
 
-<h3>👻 OPTIMAL GHOST</h3>
+
+<input id="justynaKm" type="number" step="0.001">
+
+<button onclick="moveJustyna()">Move</button>
+
+
 <p>
-  Day <span id="optDay">1</span> |
-  <span id="optText">0 km</span>
+Progress:
+<span id="jText">0</span> / 890 km
 </p>
 
+
 <div class="bar">
-  <div id="optBar" class="fill" style="background: #444;"></div>
+<div id="jBar" class="fill" style="background:#9B59B6;"></div>
 </div>
 
+</div>
+
+
+
+<div class="player">
+
+<h3>
+🟢 RAYMOND
+<div id="rBadge" class="badges"></div>
+</h3>
+
+
+<input id="raymondKm" type="number" step="0.001">
+
+<button onclick="moveRaymond()">Move</button>
+
+
+<p>
+Progress:
+<span id="rText">0</span> / 890 km
+</p>
+
+
+<div class="bar">
+<div id="rBar" class="fill" style="background:#2ECC71;"></div>
+</div>
+
+</div>
+
+
+
+<h3>👻 OPTIMAL GHOST</h3>
+
+<p>
+Day <span id="optDay">1</span> |
+<span id="optText">0 km</span>
+</p>
+
+
+<div class="bar">
+<div id="optBar" class="fill" style="background:#444;"></div>
+</div>
+
+
+
 <h3>🏁 RACE STATUS</h3>
-<p id="leaderText">Waiting for movement...</p>
+
+<p id="leaderText">
+Waiting for movement...
+</p>
+
+
 
 <button onclick="saveProgress()">💾 Save</button>
 
+
 <div id="map"></div>
 
+
 <script>
+  // ---------------- MAP ----------------
+
 var map = L.map('map').setView([43.1, -79.1], 8);
 
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18,
+  maxZoom:18
 }).addTo(map);
+
+
 
 let realTrail = [];
 let cumDist = [];
 
-/* ---------------- DISTANCE ---------------- */
-function haversine(a, b) {
-  const R = 6371000;
-  const toRad = x => x * Math.PI / 180;
 
-  const dLat = toRad(b[0] - a[0]);
-  const dLng = toRad(b[1] - a[1]);
 
-  const x =
-    Math.sin(dLat/2)**2 +
-    Math.sin(dLng/2)**2 *
-    Math.cos(toRad(a[0])) *
-    Math.cos(toRad(b[0]));
+// ---------------- RED FLAG CHECKPOINTS ----------------
 
-  return 2 * R * Math.asin(Math.sqrt(x));
-}
+// These are your existing flag coordinates
 
-/* ---------------- MARKERS ---------------- */
-var justyna = L.marker([43.1, -79.1], {
-  icon: L.divIcon({
-    html: '<div style="font-size:18px;">🟣</div>'
-  })
-}).addTo(map);
+const checkpoints = [
 
-var raymond = L.marker([43.1, -79.1], {
-  icon: L.divIcon({
-    html: '<div style="font-size:18px;">🟢</div>'
-  })
-}).addTo(map);
+  {
+    name:"Section 2",
+    latlng:[43.19132,-79.56467]
+  },
 
-var ghost = L.marker([43.1, -79.1], {
-  icon: L.divIcon({
-    html: '<div style="font-size:18px;">👻</div>'
-  })
-}).addTo(map);
+  {
+    name:"Section 3",
+    latlng:[43.50043,-79.95124]
+  },
 
-/* ---------------- UI ---------------- */
-function updateUI(prefix, km) {
-  const total = 890;
-  const percent = Math.min((km / total) * 100, 100);
+  {
+    name:"Section 4",
+    latlng:[43.76391,-79.93752]
+  },
 
-  document.getElementById(prefix + "Text").innerText = km.toFixed(3);
-  document.getElementById(prefix + "Bar").style.width = percent + "%";
-}
+  {
+    name:"Section 5",
+    latlng:[44.03029,-80.05761]
+  },
 
-function updateLeader(jKm, rKm) {
-  const gap = Math.abs(jKm - rKm).toFixed(3);
-  const el = document.getElementById("leaderText");
+  {
+    name:"Section 6",
+    latlng:[44.26728,-80.16348]
+  },
 
-  if (jKm > rKm) {
-    el.innerText = `Justyna ahead by ${gap} km`;
-    el.style.color = "#9B59B6";
-  } else {
-    el.innerText = `Raymond ahead by ${gap} km`;
-    el.style.color = "#2ECC71";
+  {
+    name:"Section 7",
+    latlng:[44.50501,-80.33165]
+  },
+
+  {
+    name:"Section 8",
+    latlng:[44.49996,-80.63298]
+  },
+
+  {
+    name:"Section 9",
+    latlng:[44.74213,-81.13469]
   }
+
+];
+
+
+
+// ---------------- DISTANCE ----------------
+
+function haversine(a,b){
+
+const R=6371000;
+
+const lat1=a[0]*Math.PI/180;
+const lat2=b[0]*Math.PI/180;
+
+const dLat=(b[0]-a[0])*Math.PI/180;
+const dLng=(b[1]-a[1])*Math.PI/180;
+
+
+const x =
+Math.sin(dLat/2)**2 +
+Math.sin(dLng/2)**2 *
+Math.cos(lat1) *
+Math.cos(lat2);
+
+
+return R * 2 * Math.asin(Math.sqrt(x));
+
 }
 
-/* ---------------- TORONTO TIME FIX ---------------- */
-function getTorontoDate() {
-  return new Date(
-    new Date().toLocaleString("en-US", {
-      timeZone: "America/Toronto"
-    })
-  );
+
+
+// ---------------- MARKERS ----------------
+
+
+var justyna = L.marker(
+[43.1,-79.1],
+{
+icon:L.divIcon({
+html:'<div style="font-size:18px;">🟣</div>'
+})
+}
+).addTo(map);
+
+
+
+var raymond = L.marker(
+[43.1,-79.1],
+{
+icon:L.divIcon({
+html:'<div style="font-size:18px;">🟢</div>'
+})
+}
+).addTo(map);
+
+
+
+var ghost = L.marker(
+[43.1,-79.1],
+{
+icon:L.divIcon({
+html:'<div style="font-size:18px;">👻</div>'
+})
+}
+).addTo(map);
+
+
+
+
+// ---------------- BADGE SYSTEM ----------------
+
+
+function updateBadges(position, player){
+
+let key = player + "Badges";
+
+let earned =
+JSON.parse(localStorage.getItem(key)) || [];
+
+
+checkpoints.forEach((flag,index)=>{
+
+
+let distance =
+haversine(position, flag.latlng);
+
+
+if(distance < 500 && !earned.includes(index)){
+
+earned.push(index);
+
 }
 
-const startDate = new Date("2026-06-27T00:00:00-04:00");
-const kmPerDay = 6.58;
 
-/* ---------------- INDEX ---------------- */
-function getIndexFromKm(km) {
-  const target = km * 1000;
-  for (let i = 0; i < cumDist.length; i++) {
-    if (cumDist[i] >= target) return i;
-  }
-  return cumDist.length - 1;
+});
+
+
+localStorage.setItem(
+key,
+JSON.stringify(earned)
+);
+
+
+
+let badgeHTML =
+earned.map(()=> "🎖️").join(" ");
+
+
+
+if(player==="justyna"){
+
+document.getElementById("jBadge").innerHTML =
+badgeHTML;
+
 }
 
-/* ---------------- 👻 GHOST (FIXED TORONTO DAY LOGIC) ---------------- */
-function updateGhost() {
-  if (!realTrail.length) return;
 
-  const now = getTorontoDate();
+if(player==="raymond"){
 
-  const day = Math.max(
-    1,
-    Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1
-  );
+document.getElementById("rBadge").innerHTML =
+badgeHTML;
 
-  const km = day * kmPerDay;
-
-  document.getElementById("optDay").innerText = day;
-  document.getElementById("optText").innerText = km.toFixed(3) + " km";
-
-  document.getElementById("optBar").style.width =
-    Math.min((km / 890) * 100, 100) + "%";
-
-  ghost.setLatLng(realTrail[getIndexFromKm(km)]);
 }
 
-/* ---------------- LOAD GPX ---------------- */
+
+}
+
+
+
+// ---------------- LOAD EXISTING BADGES ----------------
+
+
+function loadBadges(){
+
+let j =
+JSON.parse(localStorage.getItem("justynaBadges")) || [];
+
+let r =
+JSON.parse(localStorage.getItem("raymondBadges")) || [];
+
+
+document.getElementById("jBadge").innerHTML =
+j.map(()=> "🎖️").join(" ");
+
+
+document.getElementById("rBadge").innerHTML =
+r.map(()=> "🎖️").join(" ");
+
+}
+
+
+
+
+// ---------------- UI ----------------
+
+
+function updateUI(prefix,km){
+
+let total=890;
+
+let percent =
+Math.min((km/total)*100,100);
+
+
+document.getElementById(prefix+"Text")
+.innerText =
+km.toFixed(3);
+
+
+document.getElementById(prefix+"Bar")
+.style.width =
+percent+"%";
+
+}
+
+
+
+function updateLeader(jKm,rKm){
+
+const gap =
+Math.abs(jKm-rKm).toFixed(3);
+
+
+const el =
+document.getElementById("leaderText");
+
+
+
+if(jKm>rKm){
+
+el.innerText =
+`Justyna ahead by ${gap} km`;
+
+el.style.color="#9B59B6";
+
+}
+
+else{
+
+el.innerText =
+`Raymond ahead by ${gap} km`;
+
+el.style.color="#2ECC71";
+
+}
+
+
+}
+
+
+
+
+// ---------------- GHOST ----------------
+
+
+function getTorontoDate(){
+
+return new Date(
+
+new Date().toLocaleString(
+"en-US",
+{
+timeZone:"America/Toronto"
+}
+)
+
+);
+
+}
+
+
+const startDate =
+new Date("2026-06-27T00:00:00-04:00");
+
+
+const kmPerDay=6.58;
+
+
+
+function getIndexFromKm(km){
+
+let target=km*1000;
+
+
+for(let i=0;i<cumDist.length;i++){
+
+if(cumDist[i]>=target)
+return i;
+
+}
+
+
+return cumDist.length-1;
+
+}
+
+
+
+function updateGhost(){
+
+if(!realTrail.length)
+return;
+
+
+let now=getTorontoDate();
+
+
+let day =
+Math.max(
+1,
+Math.floor((now-startDate)/
+(1000*60*60*24))+1
+);
+
+
+
+let km=day*kmPerDay;
+
+
+document.getElementById("optDay")
+.innerText=day;
+
+
+document.getElementById("optText")
+.innerText =
+km.toFixed(3)+" km";
+
+
+document.getElementById("optBar")
+.style.width =
+Math.min((km/890)*100,100)+"%";
+
+
+ghost.setLatLng(
+realTrail[getIndexFromKm(km)]
+);
+
+
+}
+
+// ---------------- LOAD GPX ----------------
+
 fetch("Bruce_Trail.gpx")
-  .then(res => res.text())
-  .then(gpxText => {
 
-    const parser = new DOMParser();
-    const gpx = parser.parseFromString(gpxText, "text/xml");
-    const geoJson = toGeoJSON.gpx(gpx);
+.then(res => res.text())
 
-    realTrail = [];
+.then(gpxText => {
 
-    geoJson.features.forEach(f => {
-      if (f.geometry?.type === "LineString") {
-        realTrail = realTrail.concat(
-          f.geometry.coordinates.map(c => [c[1], c[0]])
-        );
-      }
-    });
 
-    cumDist = [0];
-    for (let i = 1; i < realTrail.length; i++) {
-      cumDist.push(
-        cumDist[i - 1] + haversine(realTrail[i - 1], realTrail[i])
-      );
-    }
+const parser = new DOMParser();
 
-    L.polyline(realTrail, {
-      color: "brown",
-      weight: 4,
-      opacity: 0.8
-    }).addTo(map);
+const gpx =
+parser.parseFromString(
+gpxText,
+"text/xml"
+);
 
-    // LOAD SAVED VALUES (SAFE)
-    const savedJ = parseFloat(localStorage.getItem("justynaKm")) || 0;
-    const savedR = parseFloat(localStorage.getItem("raymondKm")) || 0;
 
-    document.getElementById("justynaKm").value = savedJ;
-    document.getElementById("raymondKm").value = savedR;
+const geoJson =
+toGeoJSON.gpx(gpx);
 
-    justyna.setLatLng(realTrail[getIndexFromKm(savedJ)]);
-    raymond.setLatLng(realTrail[getIndexFromKm(savedR)]);
-    ghost.setLatLng(realTrail[0]);
 
-    updateUI("j", savedJ);
-    updateUI("r", savedR);
-    updateLeader(savedJ, savedR);
-    updateGhost();
 
-    // START FLAG
-    L.marker(realTrail[0], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
+realTrail=[];
 
-    // Sec 2 start FLAG
-    L.marker([43.19132, -79.56467], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
-    
-    // Sec 3 start FLAG
-    L.marker([43.50043, -79.95124], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
 
-    // Sec 4 start FLAG
-    L.marker([43.76391, -79.93752], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
 
-    // Sec 5 start FLAG
-    L.marker([44.03029, -80.05761], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
+geoJson.features.forEach(f=>{
 
-    // Sec 6 start FLAG
-    L.marker([44.26728, -80.16348], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
 
-    // Sec 7 start FLAG
-    L.marker([44.50501, -80.33165], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);    
+if(f.geometry?.type==="LineString"){
 
-    // Sec 8 start FLAG
-    L.marker([44.49996, -80.63298], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
 
-    // Sec 9 start FLAG
-    L.marker([44.74213, -81.13469], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🚩</div>' })
-    }).addTo(map);
-    
-    // FINISH FLAG
-    L.marker(realTrail[realTrail.length - 1], {
-      icon: L.divIcon({ html: '<div style="font-size:18px;">🏁</div>' })
-    }).addTo(map);
-  });
+realTrail =
+realTrail.concat(
 
-/* ---------------- MOVEMENT ---------------- */
-function moveJustyna() {
-  if (!realTrail.length) return;
+f.geometry.coordinates.map(c=>[
+c[1],
+c[0]
+])
 
-  const km = Number(document.getElementById("justynaKm").value);
+);
 
-  justyna.setLatLng(realTrail[getIndexFromKm(km)]);
-  updateUI("j", km);
-  updateLeader(km, Number(document.getElementById("raymondKm").value) || 0);
-  updateGhost();
+
 }
 
-function moveRaymond() {
-  if (!realTrail.length) return;
 
-  const km = Number(document.getElementById("raymondKm").value);
+});
 
-  raymond.setLatLng(realTrail[getIndexFromKm(km)]);
-  updateUI("r", km);
-  updateLeader(Number(document.getElementById("justynaKm").value) || 0, km);
-  updateGhost();
+
+
+// cumulative trail distance
+
+cumDist=[0];
+
+
+for(let i=1;i<realTrail.length;i++){
+
+
+cumDist.push(
+
+cumDist[i-1] +
+haversine(
+realTrail[i-1],
+realTrail[i]
+)
+
+);
+
+
 }
 
-/* ---------------- SAVE (UNCHANGED SAFE) ---------------- */
-function saveProgress() {
-  localStorage.setItem("justynaKm", document.getElementById("justynaKm").value);
-  localStorage.setItem("raymondKm", document.getElementById("raymondKm").value);
-  alert("💾 Saved!");
+
+
+// draw trail
+
+L.polyline(
+realTrail,
+{
+color:"brown",
+weight:4,
+opacity:0.8
 }
+
+).addTo(map);
+
+
+
+// draw red flags
+
+checkpoints.forEach(flag=>{
+
+
+L.marker(
+flag.latlng,
+{
+icon:L.divIcon({
+html:
+'<div style="font-size:18px;">🚩</div>'
+})
+}
+
+).addTo(map);
+
+
+});
+
+
+
+// finish flag
+
+L.marker(
+realTrail[realTrail.length-1],
+{
+icon:L.divIcon({
+html:
+'<div style="font-size:18px;">🏁</div>'
+})
+}
+
+).addTo(map);
+
+
+
+// load saved distances
+
+const savedJ =
+parseFloat(
+localStorage.getItem("justynaKm")
+)||0;
+
+
+const savedR =
+parseFloat(
+localStorage.getItem("raymondKm")
+)||0;
+
+
+
+document.getElementById("justynaKm").value =
+savedJ;
+
+
+document.getElementById("raymondKm").value =
+savedR;
+
+
+
+// move markers
+
+justyna.setLatLng(
+realTrail[getIndexFromKm(savedJ)]
+);
+
+
+raymond.setLatLng(
+realTrail[getIndexFromKm(savedR)]
+);
+
+
+
+// update screen
+
+updateUI("j",savedJ);
+
+updateUI("r",savedR);
+
+
+updateLeader(
+savedJ,
+savedR
+);
+
+
+loadBadges();
+
+
+
+updateBadges(
+realTrail[getIndexFromKm(savedJ)],
+"justyna"
+);
+
+
+updateBadges(
+realTrail[getIndexFromKm(savedR)],
+"raymond"
+);
+
+
+updateGhost();
+
+
+
+});
+
+
+
+
+// ---------------- MOVEMENT ----------------
+
+
+function moveJustyna(){
+
+
+if(!realTrail.length)
+return;
+
+
+
+const km =
+Number(
+document.getElementById("justynaKm").value
+);
+
+
+
+const position =
+realTrail[getIndexFromKm(km)];
+
+
+
+justyna.setLatLng(position);
+
+
+
+updateUI(
+"j",
+km
+);
+
+
+
+updateLeader(
+km,
+Number(
+document.getElementById("raymondKm").value
+)||0
+);
+
+
+
+updateBadges(
+position,
+"justyna"
+);
+
+
+
+updateGhost();
+
+
+}
+
+
+
+
+function moveRaymond(){
+
+
+if(!realTrail.length)
+return;
+
+
+
+const km =
+Number(
+document.getElementById("raymondKm").value
+);
+
+
+
+const position =
+realTrail[getIndexFromKm(km)];
+
+
+
+raymond.setLatLng(position);
+
+
+
+updateUI(
+"r",
+km
+);
+
+
+
+updateLeader(
+Number(
+document.getElementById("justynaKm").value
+)||0,
+km
+);
+
+
+
+updateBadges(
+position,
+"raymond"
+);
+
+
+
+updateGhost();
+
+
+}
+
+
+
+
+// ---------------- SAVE ----------------
+
+
+function saveProgress(){
+
+
+localStorage.setItem(
+"justynaKm",
+document.getElementById("justynaKm").value
+);
+
+
+
+localStorage.setItem(
+"raymondKm",
+document.getElementById("raymondKm").value
+);
+
+
+
+alert("💾 Saved!");
+
+}
+
+
 </script>
 
 </body>
+
 </html>
